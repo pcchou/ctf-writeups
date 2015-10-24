@@ -1,3 +1,4 @@
+# Crypto 50 - SCYTCRYPTO
 ``````
 Description: Decrypt this strange word: ERTKSOOTCMCHYRAFYLIPL
 

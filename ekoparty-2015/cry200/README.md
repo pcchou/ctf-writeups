@@ -1,3 +1,4 @@
+# Crypto 200 - XOR Crypter
 ``````
 Description: The state of art on encryption, can you defeat it?
 CjBPewYGc2gdD3RpMRNfdDcQX3UGGmhpBxZhYhFlfQA=
@@ -57,7 +58,7 @@ What the script does looks like to be:
 
 1. Read string from argv[1]
 3. With a block size of 4 chars, pad the final block with \x00
-3. for each block, replace it with `the_whole_block xor block[2:4]`, which is equivalent to replacing block[2:4] with block[0:2] xor block[2:4] (all slicing in bytes)
+3. for each block, replace it with `the_whole_block xor block[2:4]`, which is equivalent to replacing block[2:4] with block[0:2] xor block\[2:4\] (all slicing in bytes)
 7. print the output after packing as a base64 encoded string
 
 Since xor is its own inverse, we don't need to do anything to reverse the operation.
