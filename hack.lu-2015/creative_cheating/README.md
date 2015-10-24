@@ -48,13 +48,13 @@ So we'll need to check if the data decrypted from `DATA` matches data from `SIG`
 I use some dirty ways including paper notes, for this step, but this is how to decrypt the data:
 
 For data (data ^ bob_d % bob_n):
-```
+```python
 import binascii
 print(str(binascii.unhexlify(format(pow(sig, 1427000713644866747260499795119265, 0x99122e61dc7bede74711185598c7), '02x')))[2:-1])
 ```
 
 For signature (sig ^ e % alice_n):
-```
+```python
 import binascii
 print(str(binascii.unhexlify(format(pow(sig, 0x10001, 0x53a121a11e36d7a84dde3f5d73cf), '02x')))[2:-1])
 ```

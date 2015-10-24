@@ -63,7 +63,7 @@ What the script does looks like to be:
 
 Since xor is its own inverse, we don't need to do anything to reverse the operation.
 
-```
+```python
 import struct
 import sys
 import base64
