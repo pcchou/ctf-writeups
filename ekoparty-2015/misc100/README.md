@@ -79,7 +79,7 @@ It reminds me that the CTF (EKOparty) is hosted in Argentina, where they use Spa
 
 Then I started a Ubuntu LiveCD VM with Spanish kb layout, and `cat` the actions.
 
-[menu](https://i.imgur.com/NX2fMlK.png)
-[truth1](http://i.imgur.com/px4nX17.png)
+![menu](https://i.imgur.com/NX2fMlK.png)
+![truth1](http://i.imgur.com/px4nX17.png)
 
 Flag: EKO{ibm_model_m}
