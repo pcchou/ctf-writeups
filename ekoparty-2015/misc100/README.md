@@ -60,7 +60,7 @@ $ cat pressit.txt | sed -E 's/ ?0x//g' | xxd -r -p | xxd
 
 After studying on it a little bit, and with the name of the challange (pressit) as a hint, I figured out that it is a IBM PC keyboard scancode dump.
 
-(0x12, 0x25, 0x18 (on line 9,10,12) are codes for "K", "E", "O" respectly)
+(0x12, 0x25, 0x18 (on line 9,10,12) are codes for "E", "K", "O" respectly)
 
 With the help of [this table](http://stanislavs.org/helppc/make_codes.html),
 I was able to convert the raw scancode to keyboard actions, and after inputing it manually to `cat`, it turns out to be:
