@@ -1,0 +1,4 @@
+Here's flag: CTF{The_binary_hide_in_QR_code!ZIP_IN_QR!It's_amazing!}
+
+
+
