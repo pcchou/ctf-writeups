@@ -1,5 +1,9 @@
 # mayday (crypto 150)
 
+這是先前跟著隊友作為亂入隊伍，去打 TW-edu CTF 2015 （台大、台科大、中央三校資安實務期末考）的小小紀錄XD
+
+~~表示還欠了很多題目的還沒寫~~
+
 Description:
 ```
 Here are some encrypted messages sent to Mayday.
