@@ -9,7 +9,7 @@
 對我們這群弱弱來說，打起來也比較有成就感，大家比較有動力挑戰看看<br>
 畢竟一般其他 CTF 的題目真的很難很難，需要很多背景知識才能玩下去XDDDD<br>
 
-先來說明一下，按照大部分在講 RSA 的文章的慣例，一般說 ![t](http://latex2png.com/output//latex_9137fac0125df890a70326ee7d009c1b.png) 指的是明文 (cleartext)、![c](http://latex2png.com/output//latex_73de1ac8af38ebfcf7fc627715aeda46.png) 指的是密文（ciphertext）、![n](http://latex2png.com/output//latex_735f8af029197c52c5e525e478b29e95.png) 指的是模數（![pq](http://latex2png.com/output//latex_323ca6f1e3bbf948172ce6d3796dc298.png) 兩個大質數的積，可以說成是公鑰的一部分，有時會用 ![m](http://latex2png.com/output//latex_d5b89c297bbfc4f3b7b824eb83764922.png) 替代），而 ![e](http://latex2png.com/output//latex_5adf2318d23fdafcf4b8231ff28815f0.png)、![d](http://latex2png.com/output//latex_4ed1f7a6e493e01e42932e12ca94685c.png) 則分別是公用指數（通常是 3, 7, 17, 65537）跟私密指數，兩者對同餘 ![n](http://i.imgur.com/vkoE8Q7.png) 時呈模反元素關係。
+先來說明一下，按照大部分在講 RSA 的文章的慣例，一般說 <img src="http://latex2png.com/output//latex_9137fac0125df890a70326ee7d009c1b.png" height=15/> 指的是明文 (cleartext)、<img src="http://latex2png.com/output//latex_73de1ac8af38ebfcf7fc627715aeda46.png" height=12 /> 指的是密文（ciphertext）、<img src="http://latex2png.com/output//latex_735f8af029197c52c5e525e478b29e95.png" height=12 /> 指的是模數（<img src="http://latex2png.com/output//latex_323ca6f1e3bbf948172ce6d3796dc298.png" height=12 /> 兩個大質數的積，可以說成是公鑰的一部分，有時會用 <img src="http://latex2png.com/output//latex_d5b89c297bbfc4f3b7b824eb83764922.png" height=12 /> 替代），而 <img src="http://latex2png.com/output//latex_5adf2318d23fdafcf4b8231ff28815f0.png" height=12 />、<img src="http://latex2png.com/output//latex_4ed1f7a6e493e01e42932e12ca94685c.png" height=12 /> 則分別是公用指數（通常是 3, 7, 17, 65537）跟私密指數，兩者對同餘 <img src="http://i.imgur.com/vkoE8Q7.png" height=12 /> 時呈模反元素關係。
 
 Description:
 ```
@@ -31,7 +31,7 @@ https://www.dropbox.com/s/lwjkboz8ee8wz6l/mayday.zip?dl=0
 ```
 
 `mayday.json` 給了我們七組 RSA 的數字，各自的  不同，不過它們的 e 都是 7<br>
-而由於 ![n](http://latex2png.com/output//latex_735f8af029197c52c5e525e478b29e95.png) 的數字非常大，我們知道也不可能因數分解來暴力破解它。
+而由於 <img src="http://latex2png.com/output//latex_735f8af029197c52c5e525e478b29e95.png" height=12 /> 的數字非常大，我們知道也不可能因數分解來暴力破解它。
 
 `mayday.py`:
 ```python
@@ -50,15 +50,15 @@ for i in range(7):
     print json.dumps({'n': n, 'e': e, 'c': c})
 ```
 
-有趣的是，根據 `mayday.py`，所有的明文 ![t](http://latex2png.com/output//latex_9137fac0125df890a70326ee7d009c1b.png) 都是一樣的，而被用了不同的公鑰（這邊指 ![n](http://latex2png.com/output//latex_735f8af029197c52c5e525e478b29e95.png)）加密，而正剛好有 7 個明文（大於 ![e](http://latex2png.com/output//latex_5adf2318d23fdafcf4b8231ff28815f0.png)，這樣就構成了 [Hastad's Broadcast Attack](https://en.wikipedia.org/wiki/Coppersmith%27s_Attack#H.C3.A5stad.27s_Broadcast_Attack)（RSA 廣播攻擊）的要件。
+有趣的是，根據 `mayday.py`，所有的明文 <img src="http://latex2png.com/output//latex_9137fac0125df890a70326ee7d009c1b.png" height=12 /> 都是一樣的，而被用了不同的公鑰（這邊指 <img src="http://latex2png.com/output//latex_735f8af029197c52c5e525e478b29e95.png" height=12 />）加密，而正剛好有 7 個明文（大於 <img src="http://latex2png.com/output//latex_5adf2318d23fdafcf4b8231ff28815f0.png" height=12 />，這樣就構成了 [Hastad's Broadcast Attack](https://en.wikipedia.org/wiki/Coppersmith%27s_Attack#H.C3.A5stad.27s_Broadcast_Attack)（RSA 廣播攻擊）的要件。
 
 Hastad's Broadcast Attack 基本上就是[中國餘數定理 （Chinese Remainder Theorem）](https://market.cloud.edu.tw/content/senior/math/tn_t2/math05/math_magic/1/1-6.htm)（也就是數學老師說的韓信點兵、鬼谷算命題）在 RSA 密碼學上的實作，<br>
 
-根據中國餘數定理（這裡以 ![e=3](http://latex2png.com/output//latex_4fe4b757e7be068210be64335367e2a3.png) 做舉例），只要，就可以求出 ![c' ≡ t^3 (mod n1n2n3)(http://latex2png.com/output//latex_0b50ff01cf5051f1539b6acbd5c51b63.png)]，而因為 ![t](http://latex2png.com/output//latex_9137fac0125df890a70326ee7d009c1b.png) 小於每一個 ![c_i](http://latex2png.com/output//latex_86c4c77d50772b63f7a210c18f2ca0fd.png)，![t^3](http://latex2png.com/output//latex_fb99a39a38225c4d80e582e5048a2332.png) 會小於 ![n1n2n3](http://latex2png.com/output//latex_b6a455b85da2e6e66bff2230f434d937.png)，<br>
-所以就可以不用管後面的模算法，直接就可以求出 ![t^3 = c'](http://latex2png.com/output//latex_0974e7ce8816396d23057025516341f5.png)。
+根據中國餘數定理（這裡以 <img src="http://latex2png.com/output//latex_4fe4b757e7be068210be64335367e2a3.png" height=12 /> 做舉例），只要，就可以求出 <img src="http://latex2png.com/output//latex_0b50ff01cf5051f1539b6acbd5c51b63.png" height=12 />，而因為 <img src="http://latex2png.com/output//latex_9137fac0125df890a70326ee7d009c1b.png" height=12 /> 小於每一個 <img src="http://latex2png.com/output//latex_86c4c77d50772b63f7a210c18f2ca0fd.png" height=12 />，<img src="http://latex2png.com/output//latex_fb99a39a38225c4d80e582e5048a2332.png" height=12 /> 會小於 <img src="http://latex2png.com/output//latex_b6a455b85da2e6e66bff2230f434d937.png" height=12 />，<br>
+所以就可以不用管後面的模算法，直接就可以求出 ![t^3 = c'](http://latex2png.com/output//latex_0974e7ce8816396d23057025516341f5.png" height=12 />。
 
-這邊提供了七組的 ![c_i = t^e % n](http://latex2png.com/output//latex_bfd866dd6d681fbf9ab8eec5f7343d5b.png) ，化成同餘式則是七組 ![t^e ≡ c_i (mod n)](http://latex2png.com/output//latex_07401cdb4f2a419f8697ae10a7f05410.png) （![c_i = c1, c2, c3, …, c7](http://latex2png.com/output//latex_6c8bc8685c4da46e52dc9d44c1507b78.png)），透過上面的方式就可以推出原先的 ![t^e](http://latex2png.com/output//latex_01d7ca40c5423d96dd1a3b3aad783d3b.png)，<br>
-再來就只要 ![e](http://latex2png.com/output//latex_5adf2318d23fdafcf4b8231ff28815f0.png) 的值沒有太高（這裡是7），可以快速求出其次方根，就可以解出 ![t](http://latex2png.com/output//latex_9137fac0125df890a70326ee7d009c1b.png)。
+這邊提供了七組的 <img src="http://latex2png.com/output//latex_bfd866dd6d681fbf9ab8eec5f7343d5b.png" height=12 /> ，化成同餘式則是七組 <img src="http://latex2png.com/output//latex_07401cdb4f2a419f8697ae10a7f05410.png" height=12 /> （<img src="http://latex2png.com/output//latex_6c8bc8685c4da46e52dc9d44c1507b78.png" height=12 />），透過上面的方式就可以推出原先的 <img src="http://latex2png.com/output//latex_01d7ca40c5423d96dd1a3b3aad783d3b.png" height=12 />，<br>
+再來就只要 <img src="http://latex2png.com/output//latex_5adf2318d23fdafcf4b8231ff28815f0.png" height=12 /> 的值沒有太高（這裡是7），可以快速求出其次方根，就可以解出 <img src="http://latex2png.com/output//latex_9137fac0125df890a70326ee7d009c1b.png" height=12 />。
 
 所以我們來解這個同餘方程組吧！不重造輪子，我找了 [Rosetta Code 上的 CRT solver](http://rosettacode.org/wiki/Chinese_remainder_theorem#Python) （針對解中國餘式定理的同餘方程組的工具：
 
@@ -89,5 +89,5 @@ print(binascii.unhexlify(hex(t)[2:]))   # 把結果從數字先轉成 hex 再轉
 Flag: `CTF{Hastad's Broadcast Attack & Chinese Remainder Theorem}`
 
 應該是因為配合資安課程的關係，這是一題非常經典，利用 textbook RSA （純理論 RSA）的漏洞進行的題目。<br>
-實際上在進行 RSA 加密應用的時候，主要是因為 padding 的技巧讓每一次的 ![t](http://latex2png.com/output//latex_9137fac0125df890a70326ee7d009c1b.png) 都不一樣，這樣的攻擊型態就會失效，所以這種的攻擊在實務上是很難達到什麼影響的。<br>
+實際上在進行 RSA 加密應用的時候，主要是因為 padding 的技巧讓每一次的 <img src="http://latex2png.com/output//latex_9137fac0125df890a70326ee7d009c1b.png" height=12 /> 都不一樣，這樣的攻擊型態就會失效，所以這種的攻擊在實務上是很難達到什麼影響的。<br>
 不過有一點值得提到的是，在這種 textbook RSA 中，可以看到這樣的數學理論實際用在密碼學上也是挺有趣的XDD
