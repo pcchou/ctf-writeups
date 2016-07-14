@@ -11,24 +11,22 @@ http://52.68.224.122:9000/
 
 這題裡面有不自動 padding 產生的 HMAC，題目名稱又叫 LEA，開宗明義就是 Length Extension Attack 嘛！
 
-[Length Extension Attack](https://en.wikipedia.org/wiki/Length_extension_attack) 是一種針對在直接拿把 key + data 接在一起，沒有任何 padding 的 hash，當作脆弱的 HMAC 使用的時候的攻擊型態。<br>
-因為用了 SHA-1 的背後，有個產生 hash 的結構叫 Merkle–Damgard，<br>
-它有一個問題就是，當你知道 任一一個message 和算出來的 MAC，只需再知道 key 的長度，儘管不知道 key 的值，也能透過在後面加一些字串的方式，算出符合的 HMAC。
+[Length Extension Attack](https://en.wikipedia.org/wiki/Length_extension_attack) 是一種針對這種情況的攻擊型態：<br>
+直接拿把 key + data 接在一起，沒有任何 padding 的 hash，當作脆弱的 HMAC 使用，這樣會因為 SHA-1 演算法的背後，有資料結構產生的問題，而讓這個攻擊型態有機可圖。
+當你知道 任一一個message 和算出來的 MAC，只需再知道 key 的長度，儘管不知道 key 的值，也能透過在後面加一些字串的方式，算出符合的 HMAC。
 
 有一個工具叫做 [HashPump](https://github.com/bwall/HashPump)，可以幫我們推出 Length Extension Attack 這個手法需要的 payload。
 
-反正就生：
+我們打開 python intrepreter，開始吧：
+
+首先先 import 需要的函式庫（`hashpump`、用來發 HTTP 的 `requests`、解析 base64 編碼的 `base64`）：
 
 ```
 >>> from requests import get
 >>> from hashpumpy import hashpump
 >>> import base64
->>> token = get("http://52.68.224.122:9000/sign", {"deprecated":True, "data":'\x36'*64+'a'}).text
->>> token
-'71d326b6de4844332173e4fa661712abf37ffd19'
+>>> token = get("http://52.68.224.122:9000/sign", {"deprecated":True, "data":'\x36'*64+'a'}).text # 我們先從主機取得它產生出來的 token，再來玩玩 hashpump
 >>> result = hashpump(token, 'a', 'flag', 64)
->>> result
-('5be054779031ac988404f7bb14679a00e1b8fab4', b'a\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x08flag')
 >>> sign = get("http://52.68.224.122:9000/sign", {"deprecated":True, "data": b'\x5c'*64+binascii.unhexlify(token[0])}).text
 >>> sign
 'a7ee3fb6b18e7fdd51cadfeb63e2c7d0d0c6a3c5'
@@ -37,3 +35,4 @@ http://52.68.224.122:9000/
 ```
 
 Flag `CTF{did you use hashpump~?}`
+
