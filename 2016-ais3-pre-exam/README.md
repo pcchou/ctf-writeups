@@ -1,6 +1,15 @@
 AIS3 pre-exam 簡單的 write-up
 =============================
 
+這次自己來亂入 AIS3 pre-exam，<br>
+還是沒有好好了解看看 pwn 的東西很難過，連試都沒試Orz<br>
+解的時間不夠 剩下的題目好難 Q_____Q<br>
+破臺的大黑黑是神人啊啊啊
+
+（順序按照我的解題順序）
+
+希望這裡沒有什麼理解錯的地方 OTZ
+
 ## web1
 Flag: `ais3{Y0u_beat_the_G00g1e!!}`
 
@@ -78,7 +87,7 @@ Admin's secret is: ais3{admin's_pane1_is_on_fir3!!!!!}</body>
 </html>
 ```
 
-作人果然還是不要隨波逐流比較好orz，只要不跟著 302 就沒事了。
+作人還是不要隨波逐流比較好（？），只要不跟著 302 就沒事了。
 
 ## crypto2
 Flag: `ais3{HasH.eXtension.@tt@ck!}`
@@ -202,15 +211,6 @@ $ xxd flag.enc
 $ find -name '*.pub' -exec bash -c 'grep -v -- ----- {}| base64 -d | openssl asn1parse -inform DER -i -strparse 19' \; | grep 'hl=4' | grep 'INTEGER' | awk -F':' '{print $4}' > moduli # 把所有的 .pub 檔案 都讀出來，用 openssl 取出，再把不要的東西刪掉
 $ wc -l moduli # 確定是 100 個沒有錯
 100 moduli
-$ python
-Python 3.5.0 (default, Oct 27 2015, 19:12:43)
-[GCC 5.2.1 20151010] on linux
-Type "help", "copyright", "credits" or "license" for more information.
->>> with open('moduli', 'r') as f: moduli = f.readlines()
-...
->>> moduli = [int(x, 16) for x in moduli] # 轉成十進位方便儲存
->>> from json import dumps
->>> with open('moduli', 'w') as f: f.write(dumps(moduli)) # 存回 "moduli" 這個檔案
 ```
 
 繼續前面的話題，我們知道 RSA 加密會成立，其中必須要件是模數必須要是 ![p](http://latex.codecogs.com/png.latex?p) ![q](http://latex.codecogs.com/png.latex?q) 兩個很大的質數相乘構成。進行因數分解礦日費時，因此 ![p](http://latex.codecogs.com/png.latex?p) ![q](http://latex.codecogs.com/png.latex?q) 才不會被得知，也才能保證加密有效。
@@ -222,9 +222,9 @@ Type "help", "copyright", "credits" or "license" for more information.
 ```python
 >>> from json import loads
 >>> from math import gcd
->>> with open('moduli', 'r') as f:
-...     moduli = loads(f.read())
+>>> with open('moduli', 'r') as f: moduli = f.readlines() # 讀出剛剛轉存的數值
 ...
+>>> moduli = [int(x, 16) for x in moduli] # 轉成十進位
 >>> for i in moduli:
 ...     for j in moduli:
 ...         if i==j: pass # 當兩個要測試的數字是同一個時略過
@@ -241,7 +241,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 這下我們只要求出 p 和 q，再代回 RSA 解密的算式 ![t = c^e mod n](http://latex.codecogs.com/png.latex?t%20=%20c^{e}%20\\mod%20n)，就能得到解答了...？
 
-```
+```python
 >>> from gmpy import invert # gmpy 這個 library 裡面有方便能直接 import 的求模反元素（modinv）函數，不過上網也很容易找到一樣的東西
 >>> p = gcd(i, j)
 >>> q = i // p # i = n = p * q，除回來
@@ -256,7 +256,7 @@ b'3\xd1\xf3\nD_\xd9\x16\xf8\xa5\x08\x83\xddHz"\x88N\xb3\x13\r%\x10\xafU\xeff\xdd
 疑？為什麼這樣還沒算出 flag 呢？
 
 裡面有很多的公鑰，不過即使我們能夠分解它，只要 `flag.enc` 不是用它加密的，對我們都沒有用。<br>
-因此我們需要嘗試求出每個公鑰的因數，看其中哪些有辦法讓我們成功把 `flag.enc` 解密。
+因此我們需要嘗試求出每個公鑰的因數，看到底是哪一個可以成功把 `flag.enc` 解密。
 
 ```python
 #!/usr/bin/env python3
@@ -267,35 +267,43 @@ import json
 from gmpy import gcd, invert
 from binascii import *
 
-with open('moduli.json', 'r') as f:
-    moduli = json.loads(f.read())
+with open('moduli', 'r') as f:
+    moduli = f.readlines() # 讀出剛剛轉存的數值
+moduli = [int(x, 16) for x in moduli] # 轉成十進位
 
 with open('flag.enc', 'rb') as f:
     ciphertext = int(hexlify(f.read()), 16)
 
 cleartext = b''
 
-for i in moduli:
-    for j in moduli:
-        if i==j:
-            pass
-        else:
-            p = gcd(i,j)
-            if p != 1:
-                q = i // p
-                d = int(invert(0xab1ce13, (p-1)*(q-1)))
-                try:
-                    cleartext = unhexlify(format(pow(ciphertext, d, i), 'x'))
-                except Error:
-                    pass
-                break
+while b'ais3' not in cleartext:
+    for i in moduli:
+        for j in moduli:
+            if i==j:
+                pass
+            else:
+                p = gcd(i,j)
+                if p != 1:
+                    q = i // p
+                    d = int(invert(0xab1ce13, (p-1)*(q-1)))
+                    try:
+                        cleartext = unhexlify(format(pow(ciphertext, d, i), 'x'))
+                    except Error:
+                        pass
+                    break
+else:
+    print(cleartext)
 ```
 
 於是 Flag 就出來囉：
 
 ```
-$ python solve.py | grep ais3
+$ time python solve.py
 b'ais3{Euc1id3an_a1g0ri7hm_i5_u53fu1}'
+
+real    0m5.283s
+user    0m5.248s
+sys     0m0.000s
 ```
 
 ## crypto1
@@ -362,16 +370,15 @@ telnet://quiz.ais3.org:9150
 5. 讀當前目錄的 `flag.txt`，把它和 tar 解壓縮出來，裡面的 `guess.txt` 比較
 6. 如果上一步比較相同，就噴出 `flag.txt` 給我們
 
-前面純文字資料的部份，正好 tar 是個純文字的檔案格式，只要裡面也是純文字就不會有任何 ascii 無法編碼的資料出現。
+前面純文字資料的部份，正好 tar 是個純文字的檔案格式，只要裡面也是純文字就不會有任何 ascii 無法編碼的資料出現，不打緊。
 
-不過我們不知道 flag，要怎麼樣做出讓它比對成功呢？
-
+不過我們不知道 flag，要怎麼讓它比對成功呢？<br>
 答案是透過 UNIX 下的檔案連結：symbolic link 的方式。
 
 因為 tar 可以完整保存 UNIX 的檔案格式、權限（整個 inode 的參數），所以包括連結指向的東西也可以保留在內，解壓縮時也會重新展開。
 
 我們只要在本地端建立一個指到 flag 的 symbolic link，然後再包到 tar 裡面，傳給主機，
-它就會判斷兩個指向一樣的檔案，最後就會給我們 flag 了！
+它比較的就會實指同一個檔案，最後就會給我們 flag 了！
 
 ```
 $ ln -s flag.txt guess.txt
@@ -392,9 +399,10 @@ subprocess.CalledProcessError: Command '['/usr/bin/sha1sum', './tmpotzmg755/gues
 疑！竟然還是出現錯誤了，該怎麼辦呢？
 
 看來是 symlink 沒有指到對的地方的關係，不過這個錯誤訊息透漏了一個蛛絲馬跡：<br>
-我們的檔案在 `/home/misc/misc.py`！
+我們的家目錄很有可能在 `/home/misc`！<br>
+而因為前面已經有 `os.chdir(os.environ['HOME'])` 的關係，所以可以確定家目錄就是當前讀檔的目錄了，
 
-所以只要把 symlink 改指到 `/home/misc/flag.txt` 就可以成功了：
+所以只要把 symlink 改指到 `/home/misc/flag.txt` 就可以成功獲取 flag：
 
 ```
 $ rm guess.txt
@@ -517,11 +525,11 @@ telnet quiz.ais3.org 2154
 
 ![remote1 pseudocode](http://i.imgur.com/ydj67S8.png)
 
-比較特別的是下面在比對的是 ( 隨機數字 ^ 輸入數字 == 538354003 )，所以在之後解題的時候需要注意一點。
+比較特別的是下面在比對的是 ( 隨機數字 ^ 輸入數字 == 538354003 ），而不是單純的猜亂數，在之後解題的時候需要注意一點。
 
-而我們要怎麼猜出那個數字是什麼，一次就成功答對呢？
+回到正題，而我們要怎麼猜出那個數字是什麼，一次就成功答對呢？
 
-我們可以看到前面的 `srand()` 那邊，是以 `time(0)` 作為產生偽亂數的種子碼，所以只要在跟主機同時 call `srand()` 函數，就會產生出一樣的亂數。
+我們可以看到前面的 `srand()` 那邊，是以 `time(0)` 作為產生偽亂數的種子碼，因為 `glibc` 的實做方式都是一樣的（Linear Congruential Generator；LCG），所以只要在跟主機同時 call `srand()` 函數，就會產生出一樣的「亂數」。
 
 寫寫 code：
 
@@ -551,7 +559,8 @@ ais3{sEEd_is_cRiTiCaL_@_@}
 ```
 
 Flag 就出來囉！
-我先前有透過 NTP 校時過，否則可能會因為些許時差而產生出不同的亂數。
+
+（注意我這裡先前有透過 NTP 校時過，如果時間不對的話可能會因為些許時差而產生出不同的亂數。）
 
 ## binary3
 Flag: `ais3{a XOR b XOR 1oo1l}`
@@ -601,7 +610,7 @@ Read the binary!
 
 find = 0x402471，avoid = 0x40247d，輸入 angr 讓他跑跑跑：
 
-```
+```python
 >>> import angr
 >>> p = angr.Project("caaaaalculate")
 >>> ex = p.surveyors.Explorer(find=(0x402471, ), avoid=(0x40247d, ))
@@ -625,7 +634,7 @@ https://quiz.ais3.org:8013
 
 題目的 `download.php` 有 LFI 漏洞，可以讀 source，可是有加 waf filter（在 `../waf.php`），擋住含有 `flag` 的輸入，
 
-這題利用了 PHP 5 的 `parse_url` 的一個漏洞（https://bugs.php.net/bug.php?id=66813），只要有 URL query string 有冒號+數字，就會讓 `parse_url` 直接噴出 `bool(false)`。<br>
+這題利用了 PHP 5 的 `parse_url` 的一個漏洞（[https://bugs.php.net/bug.php?id=66813](https://bugs.php.net/bug.php?id=66813)），只要有 URL query string 有冒號+數字，就會讓 `parse_url` 直接噴出 `bool(false)`。<br>
 這樣一來 `waf.php` 裡面 `stristr` 判斷的就只會是空字串，在 `download.php` 中卻可以拿到正確的 `$_GET['p']`。
 
 （這個也是之後拆開才發現的，跟原本自己想的不一樣）
