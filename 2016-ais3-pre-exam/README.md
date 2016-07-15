@@ -10,6 +10,8 @@ AIS3 pre-exam 簡單的 write-up
 
 希望這裡沒有什麼理解錯的地方 OTZ
 
+![scoreboard](https://i.imgur.com/oZoC18v.png)
+
 ## web1
 Flag: `ais3{Y0u_beat_the_G00g1e!!}`
 
